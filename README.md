@@ -1,3 +1,5 @@
+Updated to include server states using Fetch API.
+
 ### Running the app
 
 1. Ensure you have `npm` installed.

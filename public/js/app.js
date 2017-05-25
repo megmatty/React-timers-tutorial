@@ -1,22 +1,20 @@
 class TimerDashboard extends React.Component {
 	//babel transform-class-properties property initializer syntax
 	state = {
-		timers: [
-			{
-				title: 'Practice Squat',
-				project: 'Gym Chores',
-				id: uuid.v4(),
-				elapsed: 5456099,
-				runningSince: Date.now()
-			},
-			{
-				title: 'Bake Bread',
-				project: 'Kitchen Chores',
-				id: uuid.v4(),
-				elapsed: 1273998,
-				runningSince: null
-			},
-		]
+		timers: [],
+	};
+
+	componentDidMount() {
+		this.loadTimersFromServer();
+		setInterval(this.loadTimersFromServer, 5000);
+		//calls every 5 seconds to keep client state from drifting from server
+	}
+
+	loadTimersFromServer = () => {
+		client.getTimers((serverTimers) => (
+				this.setState({ timers: serverTimers })
+			)
+		);
 	};
 
 	handleCreateFormSubmit = (timer) => {
@@ -50,8 +48,11 @@ class TimerDashboard extends React.Component {
 				} else {
 					return timer;
 				}
-			})
+			}),
 		});
+		client.startTimer(
+			{ id: timerId, start: now}
+		);
 	};
 
 	stopTimer = (timerId) => {
@@ -67,8 +68,11 @@ class TimerDashboard extends React.Component {
 				} else {
 					return timer;
 				}
-			})
+			}),
 		});
+		client.stopTimer(
+			{ id: timerId, stop: now}
+		);
 	};
 
 	deleteTimer = (timerId) => {
@@ -76,6 +80,9 @@ class TimerDashboard extends React.Component {
 			timers: this.state.timers.filter(t => t.id !== timerId),
 			//filters all items that don't match timerId into a new array
 		});
+		client.deleteTimer(
+			{ id: timerId }
+		);
 	};
 
 	createTimer = (timer) => {
@@ -83,6 +90,7 @@ class TimerDashboard extends React.Component {
 		//uses helper function to create a new timer
 		this.setState({ timers: this.state.timers.concat(t) });
 		//sets state to append new timer to timers array
+		client.createTimer(t);
 	};
 
 	updateTimer = (attrs) => {
@@ -96,8 +104,9 @@ class TimerDashboard extends React.Component {
 				} else {
 					return timer;
 				}
-			})
+			}),
 		});
+		client.updateTimer(attrs);
 	};
 
 	render() {
